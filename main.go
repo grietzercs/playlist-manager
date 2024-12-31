@@ -1,6 +1,8 @@
 package main
 
-import ()
+import (
+	"log"
+)
 
 type Song struct {
 	Name, Artist, Album string
@@ -9,5 +11,11 @@ type Song struct {
 func main() {
 	secrets := getCredsFromFile()
 	base64Creds := getb64Creds(secrets.ClientID, secrets.ClientSecret)
-	sendRequest(base64Creds)
+	getSpotifyUserToken(base64Creds)
+
+	aMusicToken, err := generateToken()
+	if err != nil {
+		log.Fatal("Failed to get apple music token from function 'generateToken'\n", err)
+	}
+	print(aMusicToken)
 }

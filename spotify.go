@@ -1,14 +1,16 @@
 package main
 
 import (
+	"bytes"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
-	"bytes"
+
 	"github.com/joho/godotenv"
 )
 
@@ -42,27 +44,32 @@ func getb64Creds(id string, pass string) string {
 	return b64Creds
 }
 
-func sendRequest(creds string) {
+func getSpotifyUserToken(creds string) string {
 	authHeader := "Basic " + creds
 	params := url.Values{}
 	params.Add("grant_type", "client_credentials")
+	var responseData map[string]interface{}
 
 	request, err := http.NewRequest("POST", apiAuthEndpoint, bytes.NewBufferString(params.Encode()))
 	if err != nil {
 		log.Fatal("Error creating new http request with url: ", apiEndpoint)
-		return
+		return ""
 	}
 	request.Header.Add("Authorization", authHeader)
 	request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	
+
 	client := &http.Client{}
 	response, err := client.Do(request)
 	if err != nil {
 		log.Fatal("Error on response", err)
+		return ""
 	} else {
 		defer response.Body.Close()
 		data, _ := io.ReadAll(response.Body)
+		json.Unmarshal(data, &responseData)
 		fmt.Println("Status: ", response.Status)
-		fmt.Println("Data: ", string(data))
+		fmt.Println("Data: ", responseData["access_token"])
 	}
+	// maybe can use gob package for more simpler return
+	return responseData["access_token"].(string)
 }
