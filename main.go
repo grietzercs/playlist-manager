@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"playlist-manager/apple-music"
 )
 
 type Song struct {
@@ -13,9 +14,10 @@ func main() {
 	base64Creds := getb64Creds(secrets.ClientID, secrets.ClientSecret)
 	getSpotifyUserToken(base64Creds)
 
-	aMusicToken, err := generateToken()
+	aMusicToken, err := applemusic.GenerateToken()
 	if err != nil {
 		log.Fatal("Failed to get apple music token from function 'generateToken'\n", err)
 	}
-	print(aMusicToken)
+	applemusic.TestAuthorization(aMusicToken)
+	applemusic.GetTopStorePlaylists(aMusicToken)
 }
